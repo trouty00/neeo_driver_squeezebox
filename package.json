@@ -1,6 +1,6 @@
 {
   "name": "neeo_driver_squeezebox",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "This driver adds Squeezebox / Logitech Media Server support to NEEO",
   "main": "index.js",
   "scripts": {
