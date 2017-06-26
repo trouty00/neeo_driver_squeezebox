@@ -1,1 +1,1 @@
-# neeo_driver_squeezebox
+# neeo_driver-squeezebox
