@@ -1,4 +1,4 @@
-# neeo_driver-squeezebox
+﻿# neeo_driver_squeezebox
 
 
 This app brings NEEO and Squeezebox / Logitech Media Server (LMS) together- It is a very rudimentary implementation utilising the LMS CLI via a socket/telnet connection.
