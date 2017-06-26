@@ -22,9 +22,10 @@ function buttonMappings() {
 {neeo: 'SKIP FORWARD', squeeze:' playlist index +1 \n'},
 {neeo: 'Random Album', squeeze:' randomplay albums \n'},
 {neeo: 'Random Track', squeeze:' randomplay track \n'},
-{neeo: 'Radio 1', squeeze:' favorites playlist play item_id:11 \n'},
-{neeo: 'Radio 2', squeeze:' favorites playlist play item_id:10 \n'},
-{neeo: 'Radio 5', squeeze:' favorites playlist play item_id:7 \n'},
+/*
+//REPLACE 11 with the number of your corresponding scene and duplicate the line as required.
+{neeo: 'ENTER YOUR NAME OF FAVORITE YOU WANT', squeeze:' favorites playlist play item_id:11 \n'},
+*/
 
 	// Add the rest.	//example of working map
 	
@@ -35,8 +36,10 @@ module.exports.squeezebox1ButtonPressed = function squeezebox1ButtonPressed(name
 const keyMap = buttonMappings().find((key) => key.neeo === name);
 var net = require('net');
 var client = new net.Socket();
-var MAC = '00:04:20:17:5d:6e';
-	client.connect(9090, '192.168.1.10', function() {
+//enter MAC address of Squeezebox PLAYER here.
+var MAC = '00:06:5F:17:5d:6e';
+	//enter IP address of Squeezebox SERVER here.
+	client.connect(9090, 'xx.xx.xx.xx', function() {
 	client.write(MAC+keyMap.squeeze);
 	console.log ('You just sent '+ keyMap.squeeze + 'to '+MAC+ ', Please ensure this MAC matches');
 	})
@@ -51,14 +54,18 @@ client.on('close', function() {
 }
 
 
+/*
+//Uncomment this section to enable the second squeezebox and duplicate as required remembering to change MAC of player
+//this Can be simply copied from above but ensure to change the squeezebox*ButtonPressed in the two areas
 
 module.exports.squeezebox2ButtonPressed = function squeezebox2ButtonPressed(name, deviceid) {
 const keyMap = buttonMappings().find((key) => key.neeo === name);
-    console.log('Key, NEEO:'+keyMap.neeo+' squeeze:'+keyMap.squeeze);
 var net = require('net');
 var client = new net.Socket();
-var MAC = '00:04:20:22:5c:74';
-	client.connect(9090, '192.168.1.10', function() {
+//enter MAC address of Squeezebox PLAYER here.
+var MAC = '00:06:5F:17:5d:6e';
+	//enter IP address of Squeezebox SERVER here.
+	client.connect(9090, 'xx.xx.xx.xx', function() {
 	client.write(MAC+keyMap.squeeze);
 	console.log ('You just sent '+ keyMap.squeeze + 'to '+MAC+ ', Please ensure this MAC matches');
 	})
@@ -71,6 +78,4 @@ client.on('close', function() {
 });
 
 }
-
-
-
+*/

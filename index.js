@@ -30,15 +30,14 @@ console.log('---------------------------------------------');
 .addButton({ name: 'SKIP FORWARD', label: 'SKIP FORWARD'}, controller.button)
 .addButton({ name: 'Random Album', label: 'Random Album'}, controller.button)
 .addButton({ name: 'Random Track', label: 'Random Track'}, controller.button)
+/*
+.addButton({ name: 'ENTER YOUR NAME OF FAVORITE YOU WANT', label: 'BUTTON NAME'}, controller.button)
+EXAMPLE
 .addButton({ name: 'Radio 1', label: 'Radio 1'}, controller.button)
-.addButton({ name: 'Radio 2', label: 'Radio 2'}, controller.button)
-.addButton({ name: 'Radio 5', label: 'Radio 5'}, controller.button)
-
-
-	
+*/
 
     .addButtonHander(controller.squeezebox1ButtonPressed);
-	
+/*	
 	//SQUEEZEBOX DEVICE 2
  const squeezebox2= neeoapi.buildDevice('Squeezebox Lounge')
   .setManufacturer('Logitech')
@@ -68,37 +67,17 @@ console.log('---------------------------------------------');
     .addButtonHander(controller.squeezebox2ButtonPressed);
   
   
- /*
-
-function Squeeze(A,B)
-socket=require('socket')
-local client = socket.connect('192.168.1.10', 9090)
---print(A.. B.." \n")
-local all=(A.. B.." \n")
-client:send(all)
-local result=client:receive()
-client:shutdown()
-end
---END STARTUP LUA
-
-
-Squeeze("00:04:20:22:5c:74"," mixer volume 56")
- 
- 
-*/ 
+*/  
   
-  
-  
-  
-  
-  //add modules above here
 function startSdkExample(brain) {
   console.log('- Start server');
   neeoapi.startServer({
-    brain: '192.168.1.120',
+    brain,
     port: 6336,
     name: 'simple-adapter-one',
-    devices: [squeezebox1,squeezebox2]
+	//Edit as per below to add additional squeezeboxes
+	//devices: [squeezebox1,squeezebox2]
+	devices: [squeezebox1]
  
   })
   .then(() => {
