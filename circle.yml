@@ -1,0 +1,6 @@
+# circle.yml
+
+test:
+  override:
+    - "true"
+
