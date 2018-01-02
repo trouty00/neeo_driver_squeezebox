@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/trouty00/neeo_driver_squeezebox.git"
+    "url": "git+https://github.com/clegendre/neeo_driver_squeezebox.git"
   },
   "keywords": [
     "Squeezebox",
@@ -23,10 +23,10 @@
     "request": "2.83.0",
     "neeo-sdk": "*"
   },
-  "author": "Stuart Trout",
+  "author": "Cédric Legendre",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/trouty00/neeo_driver_squeezebox/issues"
+    "url": "https://github.com/clegendre/neeo_driver_squeezebox"
   },
-  "homepage": "https://github.com/trouty00/neeo_driver_squeezebox#readme"
+  "homepage": "https://github.com/clegendre/neeo_driver_squeezebox#readme"
 }
