@@ -22,47 +22,44 @@ function discoverPlayers(){
   
 /**
  * 
- * It looks for favorites and spotify playlst and add them as shortcuts.
- * @function createDevices A basic adapter to control a logitech squeezebox.
- * @param player An instance of the LMS server
- * @returns The device built.
+ * It looks for favorites and spotify playlist and add them as shortcuts.
+ * @function buildDevice A basic adapter to control a logitech squeezebox.
+ * @param player An instance of a discovered SqueezeBox player
+ * @returns A promise that sould redolve with the device built.
  */
-function buildBasicAudioDevice( player ){
-    const name = player.name,
-          playerId = player.playerId;
+function buildDevice( player ){
     return new Promise( (resolve, reject) => {
-
-        let device = neeoapi.buildDevice(name)
+        let device = neeoapi.buildDevice( player.name )
             .setManufacturer('Logitech')
-            .setType('AUDIO')
-            .addButton({ name: 'VOLUME UP', label: 'VOLUME UP'} )
-            .addButton({ name: 'VOLUME DOWN', label: 'VOLUME DOWN'} )
-            .addButton({ name: 'MUTE TOGGLE', label: 'MUTE TOGGLE'} )
-            .addButton({ name: 'POWER OFF', label: 'POWER OFF'} )
-            .addButton({ name: 'POWER ON', label: 'POWER ON'} )
-            .addButton({ name: 'PLAY', label: 'PLAY'} )
-            .addButton({ name: 'PAUSE', label: 'PAUSE'} )
-            .addButton({ name: 'STOP', label: 'STOP'} )
-            .addButton({ name: 'SKIP BACKWARD', label: 'SKIP BACKWARD'} )
-            .addButton({ name: 'SKIP FORWARD', label: 'SKIP FORWARD'} )
-            .addButton({ name: 'Random Album', label: 'Random Album'} )
-            .addButton({ name: 'Random Track', label: 'Random Track'} )
-            .addTextLabel({ name: 'trackname', label: 'Track name' }, ( player ) =>{
-                console.log(arguments)
-                controller.getCurrentTitle( player );
-            });
+            .setType('AUDIO');
 
-            settings.squeeze.favorites.forEach( p => {
-                device = device.addButton({ name: p.name, label: p.name} )
-            });
-            settings.squeeze.spotify.playlists.forEach( p => {
-                device = device.addButton({ name: p.name, label: p.name} )
-            });
-
-        device = device.addButtonHander( ( command, deviceId ) => {
-            console.log('Receive command ' + command); 
-            controller.squeezeboxButtonHandlerJsonApi( command, player, deviceId );
-        } );
+        controller.build( device, player )
+            .addButton( 'VOLUME UP', function(){
+                this.player.getVolume( function( reply ){
+                    let volume = reply.result;
+                    volume += 1;
+                    player.setVolume( volume );
+                } )
+            } )
+            .addButton( 'VOLUME DOWN', function(){
+                this.player.getVolume( function( reply ){
+                    let volume = reply.result;
+                    volume -= 3;
+                    player.setVolume( volume );
+                } )
+            })
+            .addButton('MUTE TOGGLE', () => player.toggleMute() )
+            .addButton('POWER OFF', () => player.power( 0 ) )
+            .addButton('POWER ON', () => player.power( 1 ) )
+            .addButton('PLAY', () => player.play() )
+            .addButton('PAUSE', () => player.pause() )
+            .addButton('STOP', () => player.stop() )
+            .addButton('SKIP BACKWARD', () => player.playIndex(-1) )
+            .addButton('SKIP FORWARD', () => player.playIndex(1) )
+            .addButton('Random Album', () => player.playRandom('albums'))
+            .addButton('Random Track', () => player.playRandom('track'))
+            .addFavorites()
+            .addSpotify();
 
         resolve( device );
     })
@@ -71,7 +68,7 @@ function buildBasicAudioDevice( player ){
   
   
 /**
- * @function createDevices Create all devices from all discovered SqueezePlayer
+ * @function buildDevices Create all devices from all discovered SqueezePlayer
  * @param server An instance of the LMS server
  * @returns An array of devices build by the fluent neeoapi
  *  */
@@ -86,7 +83,7 @@ function buildDevices( players ){
         if(allPlayers.length == 0)reject('No players found');
         else {
             allPlayers.forEach( (player, idx ) => {
-                buildBasicAudioDevice( player ).then( device => {
+                buildDevice( player ).then( device => {
                     devices.push( device );
                     console.log( device.devicename, device.deviceidentifier)
                     if( idx == allPlayers.length-1 ){

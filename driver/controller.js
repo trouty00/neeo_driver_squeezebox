@@ -1,83 +1,53 @@
 const settings = require('./settings')();
-const buttonMappingsJsonApi =	[
-	{
-		neeo: 'VOLUME UP', 
-		squeeze: function( player, callback ){
-			player.getVolume( function( reply ){
-				let volume = reply.result;
-				volume += 3;
-				player.setVolume( volume, callback );
-			} )
-		} 
-	},
-	{
-		neeo: 'VOLUME DOWN', 
-		squeeze: function( player, callback ){
-			player.getVolume( function( reply ){
-				let volume = reply.result;
-				volume -= 3;
-				player.setVolume( volume, callback );
-			} )
-		} 
-    },
-    { 
-		neeo: 'MUTE TOGGLE', 
-		squeeze: ( player, callback ) => player.request(player.playerId, ["mixer", "muting"], callback)
-	},
-	{
-		neeo: 'POWER OFF', 
-		squeeze: ( player, callback ) => player.power( 0, callback )
-	},
-	{
-		neeo: 'POWER ON', 
-		squeeze: ( player, callback ) => player.power( 1, callback )
-	},
-	{
-		neeo: 'PLAY', 
-		squeeze: ( player, callback ) => player.play( callback )
-	},
-	{
-		neeo: 'PAUSE', 
-		squeeze: ( player, callback ) => player.pause( callback )
-	},
-	{
-		neeo: 'STOP', 
-		squeeze: ( player, callback ) => player.request(player.playerId, ["stop"], callback )
-	},
-	{
-		neeo: 'SKIP BACKWARD', 
-		squeeze: ( player, callback ) => player.playIndex(-1, callback)
-	},
-	{
-		neeo: 'SKIP FORWARD', 
-		squeeze: ( player, callback ) => player.playIndex(1, callback)
-	},
-	{
-		neeo: 'Random Album', 
-		squeeze: ( player, callback ) => player.playRandom('albums', callback)
-	},
-	{
-		neeo: 'Random Track', 
-		squeeze: ( player, callback ) => player.playRandom('track', callback)
+
+/**
+ * This controller uses the NeeoApi internaly to defines button and handler simultaneously. 
+ */
+class Controller {
+    constructor( device, player ) {
+        this.device = device;
+        this.player = player;
+		this._mappings = {};
+		
+		// exposes handle only for test purpooses. it should remain private, and is not part of the public api.
+		this.handle = function( commandName ) {
+			if( !this._mappings.hasOwnProperty(commandName)){
+				throw 'Command '+commandName+' not found.';
+			};
+			this._mappings[commandName].apply( this );
+		}
+
+		this.device.addButtonHander( this.handle.bind( this ) );
 	}
-];
-                // spotify:user:iloveplaylists:playlist:01Jn8PTFWmIB6vsRejLX5c
 
-settings.squeeze.favorites.forEach( p => {
-	buttonMappingsJsonApi.push({ neeo: p.name, squeeze: ( player, callback ) => player.playFavorite(p.itemId, callback) });
-});
-settings.squeeze.spotify.playlists.forEach( p => {
-	buttonMappingsJsonApi.push({ neeo: p.name, squeeze: ( player, callback ) => {
-		player.playlistPlay(p.user, p.itemId, callback);
-	} } );
-});
+    addButton( commandName, commandHandler, buttonLabel ){
+        this.addMapping( commandName, commandHandler);
+		this.addDeviceButton( commandName, buttonLabel );
+		return this;
+    }
+    
+    addMapping( commandName, commandHandler) {
+        if( this._mappings.hasOwnProperty(commandName)) throw new Error('A command named '+commandName+' has already been defined.')
+        this._mappings[commandName] = commandHandler;
+        return this;
+    }
 
-module.exports.squeezeboxButtonHandlerJsonApi = function ( command, player, deviceId ) {
-    const keyMap = buttonMappingsJsonApi.find((key) => key.neeo === command);
-    if( keyMap) keyMap.squeeze( player )
-    else console.error('command '+command+' not found');
+    addDeviceButton( commandName, buttonLabel ){
+        this.device.addButton({name: commandName, label: buttonLabel || commandName });
+		return this;
+    }
+
+    addFavorites(){
+        settings.squeeze.favorites.forEach( p => this.addButton( p.name, () => this.player.playFavorite( p.itemId ) ) );
+        return this;
+    }
+
+    addSpotify(){
+        settings.squeeze.spotify.playlists.forEach( p => this.addButton( p.name, () => this.player.playlistPlay( p.user, p.itemId ) ) );
+        return this;
+	}
+}
+
+module.exports.build = function( device, player ){
+	return new Controller( device,player );
 };
-
-module.exports.getCurrentTitle = ( player ) => {
-	player.getCurrentTitle( ({result}) => console.log(result) );
-} 

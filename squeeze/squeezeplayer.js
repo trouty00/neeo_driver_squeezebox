@@ -108,6 +108,10 @@ function SqueezePlayer(playerId, name, address, port) {
         this.request(playerId, ["pause"], callback);
     };
 
+    this.stop = function (callback) {
+        this.request(playerId, ["stop"], callback )
+    };
+
     this.next = function (callback) {
         this.request(playerId, ["button", "jump_rew"], callback);
     };
@@ -155,6 +159,10 @@ function SqueezePlayer(playerId, name, address, port) {
           callback(reply);
         });
     };
+
+    this.toggleMute = function(callback) {
+        this.request(playerId, ["mixer", "muting"], callback)
+    }
 
     this.playFavorite = function (favorite, callback) {
         this.request(playerId, ["favorites", "playlist", "play", "item_id:" + favorite], callback);
