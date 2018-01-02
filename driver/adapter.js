@@ -1,6 +1,7 @@
 const neeoapi = require('neeo-sdk');
 const settings = require('./settings')();
 const controller = require('./controller');
+const SqueezeServer = require('../squeeze/server');
 const http = require('http');
 const adpaterName = 'squeezebox-adapter';
 
