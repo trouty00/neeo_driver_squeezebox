@@ -14,8 +14,8 @@ describe( "Handle basic commands", function(){
                 expect(this.player).toBeDefined()
             } );
             
-        var result = theController.handle('TEST BUTTON');
-        expect(result).nothing()
+        var result = theController.getHandler('TEST BUTTON');
+        expect(result).toBeDefined();
     })
 
     it("Should throw if command is not defined", function(){
@@ -25,7 +25,6 @@ describe( "Handle basic commands", function(){
             .addButton('TEST BUTTON', () => {})
             .addButton('TEST BUTTON 2', () => {});
 
-        expect(function(){ theController.handle('TEST BUTTON THAT DOES NOT EXISTS') })
-            .toThrow('Command '+'TEST BUTTON THAT DOES NOT EXISTS'+' not found.');
+        expect(theController.getHandler('TEST BUTTON THAT DOES NOT EXISTS') ).toBeNull();
     });
 });

@@ -1,6 +1,8 @@
+const neeoapi = require('neeo-sdk');
+const http = require('http');
 const settings = require('./settings')();
 const SqueezeServer = require('../squeeze/server');
-
+const adpaterName = 'squeezebox-adapter';
 
 /**
  * Gets the brain either from environment variable or settings.
@@ -30,8 +32,8 @@ function dealWithBrainIp(callback) {
 };
 
 function setAdapterDeviceId(device) {
-    const adapterName = device.deviceidentifier;
-    console.log(`[BRAIN] Adapter name is ${adapterName}`);
+    const deviceId = device.deviceidentifier;
+    console.log(`[BRAIN] Adapter name is ${deviceId}`);
   
     return new Promise((resolve, reject) => {
           http.get({
@@ -61,7 +63,7 @@ function setAdapterDeviceId(device) {
   
               response.on('end', function() {    
                   var parsed = JSON.parse(body);
-                  var selected = parsed.find(x => x.details.adapterName === adapterName);
+                  var selected = parsed.find(x => x.details.adapterName === adpaterName);
                   if (selected) {
                     var adapterDeviceId = selected.adapterDeviceId;
                     console.log(`[BRAIN] Adapter device id is ${adapterDeviceId}`);
