@@ -177,13 +177,13 @@ class Controller {
             // Powet state management
             if( result.power === 1 ){
                 if(this.markDeviceOn){ 
-                    console.log(`Invoking markDeviceOn for ${deviceId}`)
+                    // console.log(`Invoking markDeviceOn for ${deviceId}`)
                     this.markDeviceOn(deviceId);
                 }
             }
             else {
                 if(this.markDeviceOff) {
-                    console.log(`Invoking markDeviceOff for ${deviceId}`)
+                    // console.log(`Invoking markDeviceOff for ${deviceId}`)
                     this.markDeviceOff(deviceId);
                 }
             }
@@ -201,7 +201,7 @@ class Controller {
                 let durationIncrement = (1 / result.duration) * 100
                 
                 this.durationInterval = setInterval( () => {
-                    console.log(`Invoking updateCallback for ${deviceId}`)
+                    // console.log(`Invoking updateCallback for ${deviceId}`)
                     this.sendComponentUpdate({
                         uniqueDeviceId: deviceId,
                         component: 'duration',
