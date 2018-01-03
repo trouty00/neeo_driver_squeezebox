@@ -66,54 +66,11 @@ function buildDevice( player ){
             .addButton('Random Album', () => player.playRandom('albums'))
             .addButton('Random Track', () => player.playRandom('track'))
             .addFavorites( settings.squeeze.favorites )
-            .addSpotify( settings.squeeze.spotify );
+            .addSpotify( settings.squeeze.spotify )
+            .addDurationSlider( 'Duration')
+            .addTrackLabels({ artistLabel:'Artist', albumLabel: 'Album', titleLabel:'Title' })
+            .addPowerStateManagement();
 
-        device
-            .addTextLabel( 
-                { name: 'artistname', label: 'Artist' }, 
-                () => new Promise( ( resolve, reject) => player.getArtist( ( {result} ) => resolve( result ) ) ) )
-            .addTextLabel( 
-                { name: 'albumname', label: 'Album' }, 
-                () => new Promise( ( resolve, reject) => player.getAlbum( ( {result} ) => resolve( result ) ) ) )
-            .addTextLabel( 
-                { name: 'titlename', label: 'Title' }, 
-                () => new Promise( ( resolve, reject) => player.getTitle( ( {result} ) => resolve( result ) ) ) )
-            .addSlider({name: 'duration', label: 'Duration', range:[0,100], unit: '%'},
-                {
-                    setter: (deviceId,duration) => { 
-                        player.getStatus( ({result}) => {
-                            const durationInTime = Math.round( (duration * result.duration)/100 );
-                            player.seek( durationInTime );
-                        } );
-                    },
-                    getter: () => {
-                        return new Promise( (resolve, reject) => {
-                            player.getStatus( ({result}) =>{
-                                resolve( Math.round( result.time / result.duration * 100 ) );
-                            });
-                        });
-                    }
-                } )
-
-        device.addPowerStateSensor( {
-            getter: () => {
-                return new Promise( (resolve, reject ) =>{
-                    player.getStatus( ({result}) => {
-                        resolve( result.power === 1 );
-                    } );
-                } );
-            }
-        } );
-
-        device.registerSubscriptionFunction((updateCallback, optionalCallbackFunctions) => {
-            builder.setUpdateCallbackReference( updateCallback );
-            // if (optionalCallbackFunctions && optionalCallbackFunctions.powerOnNotificationFunction) {
-            //     markDeviceOn = optionalCallbackFunctions.powerOnNotificationFunction;
-            // }
-            // if (optionalCallbackFunctions && optionalCallbackFunctions.powerOffNotificationFunction) {
-            //     markDeviceOff = optionalCallbackFunctions.powerOffNotificationFunction;
-            // }
-        });
         resolve( device );
     })
 }
