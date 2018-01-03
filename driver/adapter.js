@@ -33,20 +33,17 @@ function buildDevice( player ){
         let builder = controller.build( device, player )
             .addDefaultButtonHandler()
             .addButton( 'VOLUME UP', function(){
-                player.getVolume( function( reply ) {
-                    player.setVolume( (reply.result + 3) >= 100 ? 100 : reply.result + 3 );
+                player.getVolume( function( {result} ) {
+                    player.setVolume( (result + 3) >= 100 ? 100 : result + 3 );
                 } )
             } )
             .addButton( 'VOLUME DOWN', function(){
-                player.getVolume( function( reply ) {
-                    player.setVolume( (reply.result - 3) <= 0 ? 0 : reply.result - 3 );
+                player.getVolume( function( {result} ) {
+                    player.setVolume( ( result - 3) <= 0 ? 0 : result - 3 );
                 } )
             })
-            .addButton('SKIP BACKWARD', () => player.playIndex(-1) )
-            .addButton('SKIP FORWARD', () => player.playIndex(1) )
-            .addButton('CHANNEL DOWN', () => player.playIndex(-1) )
-            .addButton('CHANNEL UP', () => player.playIndex(1) )
-
+            .addButton(['SKIP BACKWARD','CHANNEL DOWN','CURSOR LEFT'], () => player.playIndex(-1) )
+            .addButton(['SKIP FORWARD','CHANNEL UP', 'CURSOR RIGHT'], () => player.playIndex(1) )
             .addButton('MUTE TOGGLE', () => player.toggleMute() )
             .addButton('POWER OFF', () => player.power( 0 ) )
             .addButton('POWER ON', () => player.power( 1 ) )
@@ -90,7 +87,7 @@ function buildDevices( players ){
             const player = players[playerId];
             allPlayers.push(player);
         }
-        if(allPlayers.length == 0) reject('No players found');
+        if( allPlayers.length == 0 ) reject('No players found');
         else {
             allPlayers.forEach( (player, idx ) => {
                 buildDevice( player ).then( device => {

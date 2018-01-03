@@ -1,3 +1,4 @@
+const isArray = require('isarray');
 /**
  * This controller uses the NeeoApi internaly to defines button and handler simultaneously. 
  */
@@ -26,15 +27,23 @@ class Controller {
     
     /**
      * @function addButton
-     * @param {string} buttonName the name of the button used for NEEO mapping and command handling.
+     * @param {string|Array} buttonNameOrButtonArrayNames the name of the button used for NEEO mapping and command handling.
      * @param {function} commandHandle the handler of the button when it is pressed on NEEO remote.
      * @param {string} buttonLabel the label of the button to display on NEEO remote (Optionnal).
      * @description Adds a button and a related handle by the button name convetion. The button label can be overriden.
      * @returns this.
      */
-    addButton( buttonName, commandHandler, buttonLabel ){
-        this.addMapping( buttonName, commandHandler);
-		this.addDeviceButton( buttonName, buttonLabel );
+    addButton( buttonNameOrButtonArrayNames, commandHandler, buttonLabel ){
+        if( isArray(buttonNameOrButtonArrayNames)){
+            buttonNameOrButtonArrayNames.forEach( buttonName => {
+                this.addMapping( buttonName, commandHandler);
+                this.addDeviceButton( buttonName, buttonLabel );
+            });
+        }
+        else {
+            this.addMapping( buttonNameOrButtonArrayNames, commandHandler);
+            this.addDeviceButton( buttonNameOrButtonArrayNames, buttonLabel );
+        }
 		return this;
     }
     
@@ -75,13 +84,12 @@ class Controller {
      * @description Adds a duration slider which can be used to seek track seconds on the remote.
      */
     addDurationSlider( label ){
-        this.device.addSlider( {
+        this.device.addSlider({
             name: 'duration', 
             label: label || 'Duration', 
             range:[0,100], 
             unit: '%'
-        },
-        {
+        }, {
             setter: (deviceId,duration) => { 
                 this.player.getStatus( ({result}) => {
                     const durationInTime = Math.round( (duration * result.duration)/100 );
@@ -134,9 +142,8 @@ class Controller {
             }
         } );
 
-        
         const setUpdateCallbackReference = function ( updateCallback, optionalCallbackFunctions ) {
-            this.updateCallback = updateCallback;
+            this.sendComponentUpdate = updateCallback;
             if (optionalCallbackFunctions && optionalCallbackFunctions.powerOnNotificationFunction) {
                 this.markDeviceOn = optionalCallbackFunctions.powerOnNotificationFunction;
             }
@@ -165,14 +172,20 @@ class Controller {
     }
 
     updateState(){
-        const deviceId = this.device.deviceidentifier;
+        const deviceId = 'default';
         this.player.getStatus( ({result}) => {
             // Powet state management
             if( result.power === 1 ){
-                if(this.markDeviceOn) this.markDeviceOn(deviceId);
+                if(this.markDeviceOn){ 
+                    console.log(`Invoking markDeviceOn for ${deviceId}`)
+                    this.markDeviceOn(deviceId);
+                }
             }
             else {
-                if(this.markDeviceOff) this.markDeviceOff(deviceId);
+                if(this.markDeviceOff) {
+                    console.log(`Invoking markDeviceOff for ${deviceId}`)
+                    this.markDeviceOff(deviceId);
+                }
             }
 
             // Stops the interval increment by one second for the slider update.
@@ -185,13 +198,16 @@ class Controller {
             if( result.mode == 'play'){
                 // Slider duration management
                 let duration = Math.round( result.time / result.duration * 100 );
+                let durationIncrement = (1 / result.duration) * 100
                 
                 this.durationInterval = setInterval( () => {
-                    this.updateCallback({
+                    console.log(`Invoking updateCallback for ${deviceId}`)
+                    this.sendComponentUpdate({
                         uniqueDeviceId: deviceId,
                         component: 'duration',
-                        value: ++duration
-                    } );
+                        value: duration
+                    });
+                    duration += durationIncrement;
                 }, 1 * 1000 );
 
                 // Text label management
