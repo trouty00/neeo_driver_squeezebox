@@ -42,7 +42,13 @@ function SqueezePlayer(playerId, name, address, port) {
     this.getName = function (callback) {
         this.request(playerId, ["name", "?"], callback);
     };
-
+    this.getTitle = function (callback) {
+        this.request(playerId, ["title", "?"], function (reply) {
+            if (reply.ok)
+                reply.result = reply.result._title;
+            callback(reply);
+        });
+    };
     this.getCurrentTitle = function (callback) {
         this.request(playerId, ["current_title", "?"], function (reply) {
             if (reply.ok)
@@ -108,8 +114,8 @@ function SqueezePlayer(playerId, name, address, port) {
         this.request(playerId, ["pause"], callback);
     };
 
-    this.next = function (callback) {
-        this.request(playerId, ["button", "jump_rew"], callback);
+    this.stop = function (callback) {
+        this.request(playerId, ["stop"], callback )
     };
 
     this.previous = function (callback) {
@@ -141,7 +147,7 @@ function SqueezePlayer(playerId, name, address, port) {
     };
 
     this.seek = function(seconds, callback) {
-        this.request(playerId, ["time", seconds], callback);
+        this.request(playerId, ["time", seconds.toString()], callback);
     };
 
     this.setVolume = function(volume, callback) {
@@ -151,10 +157,14 @@ function SqueezePlayer(playerId, name, address, port) {
     this.getVolume = function(callback) {
         this.request(playerId, ["mixer", "volume", "?"], function(reply) {
           if (reply.ok)
-              reply.result = reply.result._volume;
+              reply.result = parseInt( reply.result._volume );
           callback(reply);
         });
     };
+
+    this.toggleMute = function(callback) {
+        this.request(playerId, ["mixer", "muting"], callback)
+    }
 
     this.playFavorite = function (favorite, callback) {
         this.request(playerId, ["favorites", "playlist", "play", "item_id:" + favorite], callback);

@@ -1,0 +1,21 @@
+{
+    "neeo": {
+        "brainIp" : "192.168.XXX.XXX",
+        "driverPort" : 6337
+    },
+    "squeeze": {
+        "loadAllPlayers": true,
+        "spotify":{
+            "playlists":[
+                { "name": "PlayListName", "user": "spotify_playlist_user", "itemId":"spotify_playlist_id" }
+            ]
+        },
+        "favorites":[
+            { "name": "Favorite name", "itemId": "favorite_id" }
+        ]
+    },
+    "server": {
+        "host": "http://192.168.XXX.XXX",
+        "port": 9000
+    }
+}
