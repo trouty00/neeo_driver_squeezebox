@@ -10,6 +10,7 @@ class Controller {
         this._settings = {
             pollingDelay: 5 * 1000 // 5 seconds
         }
+        this._cache = {};
     }
 
     /**
@@ -115,15 +116,36 @@ class Controller {
         this.device
             .addTextLabel( 
                 { name: 'artistname', label: artistLabel||'Artist' }, 
-                () => new Promise( ( resolve, reject) => this.player.getArtist( ( {result} ) => resolve( result ) ) ) )
+                () => new Promise( ( resolve, reject) => this.player.getArtist( ( {result} ) =>{
+                    this._cache.artist = result;
+                    resolve( result );
+                }  ) ) )
             .addTextLabel( 
                 { name: 'albumname', label: albumLabel||'Album' }, 
-                () => new Promise( ( resolve, reject) => this.player.getAlbum( ( {result} ) => resolve( result ) ) ) )
+                () => new Promise( ( resolve, reject) => this.player.getAlbum( ( {result} ) => {
+                    this._cache.album = result;
+                    resolve( result );
+                 } ) ) )
             .addTextLabel( 
                 { name: 'titlename', label: titleLabel||'Title' }, 
-                () => new Promise( ( resolve, reject) => this.player.getTitle( ( {result} ) => resolve( result ) ) ) )
+                () => new Promise( ( resolve, reject) => this.player.getTitle( ( {result} ) => {
+                    this._cache.title = result;
+                    resolve( result );
+                 } ) ) )
 
         return this;
+    }
+
+
+    addCurrentTrackCover(){
+        this.device.addImageUrl(
+            { name: 'albumcover', label: 'Cover for current album', size: 'large'}, 
+            ( deviceId ) => new Promise( (resolve, reject) => {
+                this.player.getCurrentRemoteMeta( ({result}) => {
+                    this._cache.cover = this.player.address + ":"+ this.player.port + result.artwork_url;
+                    resolve(this._cache.cover );
+                } );
+            } ) );
     }
 
     /**
@@ -136,6 +158,7 @@ class Controller {
             getter: () => {
                 return new Promise( (resolve, reject ) =>{
                     this.player.getStatus( ({result}) => {
+                        this._cache.power = result.power === 1;
                         resolve( result.power === 1 );
                     } );
                 } );
@@ -211,12 +234,34 @@ class Controller {
                 }, 1 * 1000 );
 
                 // Text label management
-                // Not supported yet by the SDK
-                // this.updateCallback({
-                //     uniqueDeviceId: deviceId,
-                //     component: 'artistname',
-                //     value: duration
-                // } );
+                if( this._cache.artist ){
+                    this.sendComponentUpdate({
+                        uniqueDeviceId: deviceId,
+                        component: 'artistname',
+                        value: this._cache.artist
+                    } );
+                }
+                if( this._cache.album ){
+                    this.sendComponentUpdate({
+                        uniqueDeviceId: deviceId,
+                        component: 'albumname',
+                        value: this._cache.album
+                    } );
+                }
+                if( this._cache.title ){
+                    this.sendComponentUpdate({
+                        uniqueDeviceId: deviceId,
+                        component: 'titlename',
+                        value: this._cache.title
+                    } );
+                }
+                if( this._cache.cover ){
+                    this.sendComponentUpdate({
+                        uniqueDeviceId: deviceId,
+                        component: 'albumcover',
+                        value: this._cache.cover
+                    } );
+                }
             } 
             setTimeout( this.updateState.bind(this), this._settings.pollingDelay );
         });

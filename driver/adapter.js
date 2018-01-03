@@ -66,7 +66,8 @@ function buildDevice( player ){
             .addSpotify( settings.squeeze.spotify )
             .addDurationSlider( 'Duration')
             .addTrackLabels({ artistLabel:'Artist', albumLabel: 'Album', titleLabel:'Title' })
-            .addPowerStateManagement();
+            .addPowerStateManagement()
+            .addCurrentTrackCover();
 
         resolve( device );
     })

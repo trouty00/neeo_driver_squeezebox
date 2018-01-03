@@ -74,7 +74,7 @@ function SqueezePlayer(playerId, name, address, port) {
     };
 
     this.getCurrentRemoteMeta = function (callback) {
-        this.request(playerId, ["status"], function (reply) {
+        this.request(playerId, ["status", "-", "1", "tags:cgABbehldiqtyrSuoKLNJ"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result.remoteMeta;
             callback(reply);
