@@ -11,6 +11,12 @@ function discoverPlayers(){
                 if( reply.ok) {
                     if( settings.squeeze.loadAllPlayers) {
                         resolve( server.players )
+                    } else {
+                        const playersToLoad = {};
+                        settings.squeeze.players.forEach( p => {
+                            playersToLoad[p] = server.players[p];
+                        });
+                        resolve( playersToLoad );
                     }
                 }
             });
@@ -42,8 +48,6 @@ function buildDevice( player ){
                     player.setVolume( ( result - 3) <= 0 ? 0 : result - 3 );
                 } )
             })
-            .addButton(['SKIP BACKWARD','CHANNEL DOWN','CURSOR LEFT'], () => player.playIndex(-1) )
-            .addButton(['SKIP FORWARD','CHANNEL UP', 'CURSOR RIGHT'], () => player.playIndex(1) )
             .addButton('MUTE TOGGLE', () => player.toggleMute() )
             .addButton('POWER OFF', () => player.power( 0 ) )
             .addButton('POWER ON', () => player.power( 1 ) )
@@ -62,6 +66,7 @@ function buildDevice( player ){
             .addButton('STOP', () => player.stop() )
             .addButton('Random Album', () => player.playRandom('albums'))
             .addButton('Random Track', () => player.playRandom('track'))
+            .addNavigationButtons()
             .addFavorites( settings.squeeze.favorites )
             .addSpotify( settings.squeeze.spotify )
             .addDurationSlider( 'Duration')

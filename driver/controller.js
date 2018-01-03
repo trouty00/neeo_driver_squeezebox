@@ -79,6 +79,15 @@ class Controller {
         return this;
     }
 
+    addNavigationButtons(){
+        return this.addButton(['SKIP BACKWARD','CHANNEL DOWN','CURSOR LEFT'], () => this.player.playIndex(-1, cb => {
+                this.updateCacheFromMeta();
+            } ) )
+            .addButton(['SKIP FORWARD','CHANNEL UP', 'CURSOR RIGHT'], () => this.player.playIndex(1, cb => {
+                this.updateCacheFromMeta();
+            } ) );
+    }
+
     /**
      * @function addDurationSlider
      * @param {string} label The name of label in front of the component. Defaults to Duration.
@@ -136,6 +145,17 @@ class Controller {
         return this;
     }
 
+    updateCacheFromMeta(){
+        return new Promise( (resolve, reject) => {
+            this.player.getCurrentRemoteMeta( ({result}) => {
+                    this._cache.artist = result.artist;
+                    this._cache.album = result.album;
+                    this._cache.title = result.title;
+                    this._cache.cover = this.player.address + ":"+ this.player.port + result.artwork_url;
+                resolve(this._cache.cover );
+            } );
+        } );
+    }
 
     addCurrentTrackCover(){
         this.device.addImageUrl(
