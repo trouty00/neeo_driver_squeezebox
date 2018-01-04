@@ -38,35 +38,11 @@ function buildDevice( player ){
 
         let builder = controller.build( device, player )
             .addDefaultButtonHandler()
-            .addButton( 'VOLUME UP', function(){
-                player.getVolume( function( {result} ) {
-                    player.setVolume( (result + 3) >= 100 ? 100 : result + 3 );
-                } )
-            } )
-            .addButton( 'VOLUME DOWN', function(){
-                player.getVolume( function( {result} ) {
-                    player.setVolume( ( result - 3) <= 0 ? 0 : result - 3 );
-                } )
-            })
-            .addButton('MUTE TOGGLE', () => player.toggleMute() )
-            .addButton('POWER OFF', () => player.power( 0 ) )
-            .addButton('POWER ON', () => player.power( 1 ) )
-            .addButton('CURSOR ENTER', () => {
-                player.getStatus( ({result}) => {
-                    if( result.mode == 'play' ){
-                        player.pause();
-                    }
-                    else{
-                        player.play();
-                    }
-                })
-            } )
-            .addButton('PLAY', () => player.play() )
-            .addButton('PAUSE', () => player.pause() )
-            .addButton('STOP', () => player.stop() )
+            .addBasicActions()
+            .addVolumeActions()
+            .addNavigationButtons()
             .addButton('Random Album', () => player.playRandom('albums'))
             .addButton('Random Track', () => player.playRandom('track'))
-            .addNavigationButtons()
             .addFavorites( settings.squeeze.favorites )
             .addSpotify( settings.squeeze.spotify )
             .addDurationSlider( 'Duration')
