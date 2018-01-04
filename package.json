@@ -3,7 +3,9 @@
   "version": "2.0.0-beta",
   "description": "This driver adds Squeezebox / Logitech Media Server support to NEEO",
   "main": "index.js",
-  "scripts": { "test": "jasmine" },
+  "scripts": {
+    "test": "jasmine"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/clegendre/neeo_driver_squeezebox.git"
@@ -19,7 +21,8 @@
     "jayson": "2.0.5",
     "super": "0.2.3",
     "request": "2.83.0",
-    "neeo-sdk": "*"
+    "neeo-sdk": "*",
+    "isarray": "2.0.2"
   },
   "author": "Cédric Legendre",
   "license": "MIT",

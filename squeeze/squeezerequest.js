@@ -50,7 +50,7 @@ function SqueezeRequest(address, port) {
         var finalParams = [];
         finalParams.push(player);
         finalParams.push(params);
-        console.log('Request', finalParams.join(' '));
+        // console.log('Request', finalParams.join(' '));
         client.request('slim.request', finalParams, null, function (err, reply) {
             handle(err, reply, callback);
         });

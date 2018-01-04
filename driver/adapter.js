@@ -11,6 +11,12 @@ function discoverPlayers(){
                 if( reply.ok) {
                     if( settings.squeeze.loadAllPlayers) {
                         resolve( server.players )
+                    } else {
+                        const playersToLoad = {};
+                        settings.squeeze.players.forEach( p => {
+                            playersToLoad[p] = server.players[p];
+                        });
+                        resolve( playersToLoad );
                     }
                 }
             });
@@ -32,88 +38,18 @@ function buildDevice( player ){
 
         let builder = controller.build( device, player )
             .addDefaultButtonHandler()
-            .addButton( 'VOLUME UP', function(){
-                player.getVolume( function( reply ) {
-                    player.setVolume( (reply.result + 3) >= 100 ? 100 : reply.result + 3 );
-                } )
-            } )
-            .addButton( 'VOLUME DOWN', function(){
-                player.getVolume( function( reply ) {
-                    player.setVolume( (reply.result - 3) <= 0 ? 0 : reply.result - 3 );
-                } )
-            })
-            .addButton('SKIP BACKWARD', () => player.playIndex(-1) )
-            .addButton('SKIP FORWARD', () => player.playIndex(1) )
-            .addButton('CHANNEL DOWN', () => player.playIndex(-1) )
-            .addButton('CHANNEL UP', () => player.playIndex(1) )
-
-            .addButton('MUTE TOGGLE', () => player.toggleMute() )
-            .addButton('POWER OFF', () => player.power( 0 ) )
-            .addButton('POWER ON', () => player.power( 1 ) )
-            .addButton('CURSOR ENTER', () => {
-                player.getStatus( ({result}) => {
-                    if( result.mode == 'play' ){
-                        player.pause();
-                    }
-                    else{
-                        player.play();
-                    }
-                })
-            } )
-            .addButton('PLAY', () => player.play() )
-            .addButton('PAUSE', () => player.pause() )
-            .addButton('STOP', () => player.stop() )
+            .addBasicActions()
+            .addVolumeActions()
+            .addNavigationButtons()
             .addButton('Random Album', () => player.playRandom('albums'))
             .addButton('Random Track', () => player.playRandom('track'))
             .addFavorites( settings.squeeze.favorites )
-            .addSpotify( settings.squeeze.spotify );
+            .addSpotify( settings.squeeze.spotify )
+            .addDurationSlider( 'Duration')
+            .addTrackLabels({ artistLabel:'Artist', albumLabel: 'Album', titleLabel:'Title' })
+            .addPowerStateManagement()
+            .addCurrentTrackCover();
 
-        device
-            .addTextLabel( 
-                { name: 'artistname', label: 'Artist' }, 
-                () => new Promise( ( resolve, reject) => player.getArtist( ( {result} ) => resolve( result ) ) ) )
-            .addTextLabel( 
-                { name: 'albumname', label: 'Album' }, 
-                () => new Promise( ( resolve, reject) => player.getAlbum( ( {result} ) => resolve( result ) ) ) )
-            .addTextLabel( 
-                { name: 'titlename', label: 'Title' }, 
-                () => new Promise( ( resolve, reject) => player.getTitle( ( {result} ) => resolve( result ) ) ) )
-            .addSlider({name: 'duration', label: 'Duration', range:[0,100], unit: '%'},
-                {
-                    setter: (deviceId,duration) => { 
-                        player.getStatus( ({result}) => {
-                            const durationInTime = Math.round( (duration * result.duration)/100 );
-                            player.seek( durationInTime );
-                        } );
-                    },
-                    getter: () => {
-                        return new Promise( (resolve, reject) => {
-                            player.getStatus( ({result}) =>{
-                                resolve( Math.round( result.time / result.duration * 100 ) );
-                            });
-                        });
-                    }
-                } )
-
-        device.addPowerStateSensor( {
-            getter: () => {
-                return new Promise( (resolve, reject ) =>{
-                    player.getStatus( ({result}) => {
-                        resolve( result.power === 1 );
-                    } );
-                } );
-            }
-        } );
-
-        device.registerSubscriptionFunction((updateCallback, optionalCallbackFunctions) => {
-            builder.setUpdateCallbackReference( updateCallback );
-            // if (optionalCallbackFunctions && optionalCallbackFunctions.powerOnNotificationFunction) {
-            //     markDeviceOn = optionalCallbackFunctions.powerOnNotificationFunction;
-            // }
-            // if (optionalCallbackFunctions && optionalCallbackFunctions.powerOffNotificationFunction) {
-            //     markDeviceOff = optionalCallbackFunctions.powerOffNotificationFunction;
-            // }
-        });
         resolve( device );
     })
 }
@@ -133,7 +69,7 @@ function buildDevices( players ){
             const player = players[playerId];
             allPlayers.push(player);
         }
-        if(allPlayers.length == 0) reject('No players found');
+        if( allPlayers.length == 0 ) reject('No players found');
         else {
             allPlayers.forEach( (player, idx ) => {
                 buildDevice( player ).then( device => {
