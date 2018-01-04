@@ -106,7 +106,6 @@ function SqueezePlayer(playerId, name, address, port) {
     };
 
     this.playIndex = function (index, callback) {
-        console.log("index: " + index);
         this.request(playerId, ["playlist", "index", index], callback);
     };
 

@@ -12,6 +12,7 @@ class Controller {
         }
         this._status = {};
         this._cache = {};
+        this._lastUpdate = {};
     }
 
     /**
@@ -130,22 +131,36 @@ class Controller {
         return this;
     }
 
+    addVolumeActions(){
+        return this.addButton('MUTE TOGGLE', () => this.player.toggleMute() )
+            .addButton( 'VOLUME UP', () => {
+                this._status.volume = (this._status.volume + 3 >= 100) ? 100 : this._status.volume + 3;
+                this.player.setVolume( this._status.volume );
+            } )
+            .addButton( 'VOLUME DOWN', () => {
+                this._status.volume = (this._status.volume - 3 <= 0) ? 0 : this._status.volume - 3;
+                this.player.setVolume( this._status.volume );
+            });
+    }
+
+    addBasicActions(){
+        return this.addButton('CURSOR ENTER', () => {
+            if( this._status.mode == 'play') this.player.pause();
+            else this.player.play();
+        } )
+        .addButton('PLAY', () => this.player.play() )
+        .addButton('PAUSE', () => this.player.pause() )
+        .addButton('STOP', () => this.player.stop() );
+    }
+
     /**
      * @function addPowerStateManagement
      * @description Add power state management to the device. 
      * The power state is updated according to the real power state of the squeezebox. 
      */
     addPowerStateManagement(){
-        this.device.addPowerStateSensor( {
-            getter: () => {
-                return new Promise( (resolve, reject ) =>{
-                    this.player.getStatus( ({result}) => {
-                        this._cache.power = result.power === 1;
-                        resolve( result.power === 1 );
-                    } );
-                } );
-            }
-        } );
+        this.addButton('POWER OFF', () => this.player.power( 0 ) ).addButton('POWER ON', () => this.player.power( 1 ) )
+        this.device.addPowerStateSensor({ getter: () => !!this._cache.power });
 
         const setUpdateCallbackReference = function ( updateCallback, optionalCallbackFunctions ) {
             this.sendComponentUpdate = updateCallback;
@@ -191,7 +206,8 @@ class Controller {
         return new Promise( (resolve, reject) => {
             this.player.getStatus( ({result}) => {
                 this._status = result;
-                resoleve( this._status );
+                this._status.volume = result['mixer volume'];
+                resolve( this._status );
             });
         });
     }
@@ -247,7 +263,8 @@ class Controller {
                     }, 1 * 1000 );
                 } else {
                     // If the polling is every seconds, updates the slider directly...
-                    this.sendComponentUpdate({ uniqueDeviceId, component: 'duration', value });
+                    if( this._shouldSendUpdate('duration'))
+                        this.sendComponentUpdate({ uniqueDeviceId, component: 'duration', value });
                 }
             }
         } 
@@ -256,13 +273,24 @@ class Controller {
     updateRemoteMetaComponents() {
         const uniqueDeviceId = 'default'; //TODO: gets the device id 
         
-        if(this.sendComponentUpdate) {
-            // Text label management
-            this.sendComponentUpdate({ uniqueDeviceId, component: 'artistname', value: this._cache.artist || "" });
-            this.sendComponentUpdate({ uniqueDeviceId, component: 'albumname', value: this._cache.album || "" });
-            this.sendComponentUpdate({ uniqueDeviceId, component: 'titlename', value: this._cache.title || "" });
-            this.sendComponentUpdate({ uniqueDeviceId, component: 'albumcover', value: this._cache.cover || "" });
+        if(this.sendComponentUpdate ) {
+            if( this._shouldSendUpdate('artist'))
+                this.sendComponentUpdate({ uniqueDeviceId, component: 'artistname', value: this._cache.artist || "" });
+            if( this._shouldSendUpdate('album'))
+                this.sendComponentUpdate({ uniqueDeviceId, component: 'albumname', value: this._cache.album || "" });
+            if( this._shouldSendUpdate('title'))
+                this.sendComponentUpdate({ uniqueDeviceId, component: 'titlename', value: this._cache.title || "" });
+            if( this._shouldSendUpdate('cover'))
+                this.sendComponentUpdate({ uniqueDeviceId, component: 'albumcover', value: this._cache.cover || "" });
         }
+    }
+
+    _shouldSendUpdate( propertyName ){
+        if( this._lastUpdate[propertyName] != this._cache[propertyName] ){
+            this._lastUpdate[propertyName] = this._cache[propertyName];
+            return true;
+        }
+        return false;
     }
 }
 
