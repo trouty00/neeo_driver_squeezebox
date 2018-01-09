@@ -87,5 +87,5 @@ function buildDevices( players ){
 module.exports.discoverPlayers = discoverPlayers;
 module.exports.buildDevices = buildDevices;
 module.exports.discoverAndBuildDevices = function( callback ){
-    discoverPlayers().then( players => buildDevices( players ).then( devices => callback( devices ) ) );
+    discoverPlayers().then( players => buildDevices( players ).then( callback ) );
 }
