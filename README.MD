@@ -16,11 +16,16 @@ Enable the “Audio” device in */node_modules/neeo-sdk/lib/device/devicetype/I
 ``` javascript
 const TYPES = [
   'ACCESSOIRE',
+  'AUDIO',
+  'AVRECEIVER',
+  'DVB',
+  'DVD',
+  'GAMECONSOLE',
   'LIGHT',
   'MEDIAPLAYER',
+  'PROJECTOR',
   'TV',
-  'AVRECEIVER',
-  'AUDIO'
+  'VOD'
 ];
 ```
 
@@ -29,4 +34,8 @@ Edit the settings.json file to configure your brain IP (if not specified, brain 
 You can add your favorites and spotify playlists, they will be added as buttons. 
 
 ### Step 3
-SqueezeBox Players are discovered by the Driver. Simply look for their names 
+SqueezeBox Players are discovered by the Driver. Simply look for their names.
+
+*Known issues*: 
+- duration is not updated on the REMOTE but it is on the APP. Tracked by https://github.com/NEEOInc/neeo-sdk/issues/62
+- when changing the duration on the slider, the track is started from the beginning instead of seeking the right time. This is an issue in the Squeeze SDK seek function.
