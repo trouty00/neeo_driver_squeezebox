@@ -253,7 +253,7 @@ class Controller {
         if( this._status.mode == 'play' ){
             if( this.sendComponentUpdate ) {
                 // Slider duration management
-                let value = Math.round( this._status.time / this._status.duration * 100 );
+                let value = this._cache['duration'] = Math.round( this._status.time / this._status.duration * 100 );
 
                 if( this._settings.pollingDelay >= 2 ) {
                     const durationIncrement = (1 / this._status.duration) * 100
@@ -286,6 +286,7 @@ class Controller {
     }
 
     _shouldSendUpdate( propertyName ){
+
         if( this._lastUpdate[propertyName] != this._cache[propertyName] ){
             this._lastUpdate[propertyName] = this._cache[propertyName];
             return true;
