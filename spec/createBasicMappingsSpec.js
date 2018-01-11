@@ -6,7 +6,9 @@ describe( "Handle basic commands", function(){
     const testPlayer = new SqueezePlayer("00:00:00:00:00:00", "TestPlyer", "http://192.168.1.33", 9000);
 
     it("Should handle basic command", function(){
-        const testDevice = neeoapi.buildDevice( "TestPlyer" );
+        const testDevice = neeoapi.buildDevice( "TestPlyer" )
+            .setManufacturer('Logitech')
+            .setType('AUDIO');;
         const theController = controller
             .build( testDevice, testPlayer )
             .addButton('TEST BUTTON', function() {
@@ -19,7 +21,10 @@ describe( "Handle basic commands", function(){
     })
 
     it("Should throw if command is not defined", function(){
-        const testDevice = neeoapi.buildDevice( "TestPlyer" );
+        const testDevice = neeoapi.buildDevice( "TestPlyer" )    
+            .setManufacturer('Logitech')
+            .setType('AUDIO');
+    
         const theController = controller
             .build( testDevice, testPlayer )
             .addButton('TEST BUTTON', () => {})

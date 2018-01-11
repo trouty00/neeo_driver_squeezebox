@@ -39,3 +39,16 @@ SqueezeBox Players are discovered by the Driver. Simply look for their names.
 *Known issues*: 
 - duration is not updated on the REMOTE but it is on the APP. Tracked by https://github.com/NEEOInc/neeo-sdk/issues/62
 - when changing the duration on the slider, the track is started from the beginning instead of seeking the right time. This is an issue in the Squeeze SDK seek function.
+
+### INFO
+To check if your driver is ready, you can run:
+> npm run test
+
+This should displays the following lines:
+```
+Started
+..
+2 specs, 0 failures
+```
+
+If not, checks the errors in the console.
