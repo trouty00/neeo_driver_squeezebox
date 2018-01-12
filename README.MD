@@ -11,7 +11,7 @@ This is a fork from https://github.com/trouty00/neeo_driver_squeezebox but many 
 
 ## Instructions
 ### Step 1
-Enable the “Audio” device in */node_modules/neeo-sdk/lib/device/devicetype/Index.js* to be inline with the below
+Enable the “Audio” device in */node_modules/neeo-sdk/lib/device/validation/devicetype.js* to be inline with the below
 
 ``` javascript
 const TYPES = [
