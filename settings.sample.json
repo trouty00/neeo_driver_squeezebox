@@ -5,6 +5,7 @@
     },
     "squeeze": {
         "loadAllPlayers": true,
+        "players": ["SQUEEZE_MAC_ADDRESS_IF_loadAllPlayers_IS_FALSE"],
         "spotify":{
             "playlists":[
                 { "name": "PlayListName", "user": "spotify_playlist_user", "itemId":"spotify_playlist_id" }

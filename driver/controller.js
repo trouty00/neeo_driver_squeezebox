@@ -218,9 +218,23 @@ class Controller {
     updateRemoteMeta(){
         return new Promise( (resolve, reject) => {
             this.player.getCurrentRemoteMeta( ({result}) => {
+                if( result){
                     this._cache = result;
                     this._cache.cover = this.player.address + ":"+ this.player.port + result.artwork_url;
-                resolve( this._cache );
+                    resolve( this._cache );
+                }
+                else {
+                    this.player.getAlbum(({result}) => {
+                        this._cache.album = result;
+                        this.player.getArtist(({result}) => {
+                            this._cache.artist = result;
+                            this.player.getCurrentTitle(({result}) =>{
+                                this._cache.artist = result;
+                                resolve( this._cache );
+                            } );
+                        } );
+                    } );
+                }
             } );
         } );
     }
@@ -253,7 +267,7 @@ class Controller {
         if( this._status.mode == 'play' ){
             if( this.sendComponentUpdate ) {
                 // Slider duration management
-                let value = Math.round( this._status.time / this._status.duration * 100 );
+                let value = this._cache['duration'] = Math.round( this._status.time / this._status.duration * 100 );
 
                 if( this._settings.pollingDelay >= 2 ) {
                     const durationIncrement = (1 / this._status.duration) * 100
@@ -286,6 +300,7 @@ class Controller {
     }
 
     _shouldSendUpdate( propertyName ){
+
         if( this._lastUpdate[propertyName] != this._cache[propertyName] ){
             this._lastUpdate[propertyName] = this._cache[propertyName];
             return true;
