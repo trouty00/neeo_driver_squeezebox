@@ -218,9 +218,23 @@ class Controller {
     updateRemoteMeta(){
         return new Promise( (resolve, reject) => {
             this.player.getCurrentRemoteMeta( ({result}) => {
+                if( result){
                     this._cache = result;
                     this._cache.cover = this.player.address + ":"+ this.player.port + result.artwork_url;
-                resolve( this._cache );
+                    resolve( this._cache );
+                }
+                else {
+                    this.player.getAlbum(({result}) => {
+                        this._cache.album = result;
+                        this.player.getArtist(({result}) => {
+                            this._cache.artist = result;
+                            this.player.getCurrentTitle(({result}) =>{
+                                this._cache.artist = result;
+                                resolve( this._cache );
+                            } );
+                        } );
+                    } );
+                }
             } );
         } );
     }
