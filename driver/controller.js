@@ -84,11 +84,11 @@ class Controller {
     addNavigationButtons(){
         return this.addButton(['SKIP BACKWARD','CHANNEL DOWN','CURSOR LEFT'], () => this.player.playIndex(-1, cb => {
                 this.updateStatus();
-                this.updateRemoteMeta();
+                this.updateSong();
             } ) )
             .addButton(['SKIP FORWARD','CHANNEL UP', 'CURSOR RIGHT'], () => this.player.playIndex(1, cb => {
                 this.updateStatus();
-                this.updateRemoteMeta();
+                this.updateSong();
             } ) );
     }
 
@@ -196,7 +196,7 @@ class Controller {
      */
     update(){
         this.updateStatus().then( this.updateStatusComponents.bind( this ) );
-        this.updateRemoteMeta().then( this.updateRemoteMetaComponents.bind( this ) );
+        this.updateSong().then( this.updateSongComponents.bind( this ) );
     }
 
     /**
@@ -215,7 +215,7 @@ class Controller {
     /**
      * Updates the internal cache of player remote meta.
      */
-    updateRemoteMeta(){
+    updateSong(){
         return new Promise( (resolve, reject) => {
             this.player.getCurrentRemoteMeta( ({result}) => {
                 if( result){
@@ -284,7 +284,7 @@ class Controller {
         } 
     }
 
-    updateRemoteMetaComponents() {
+    updateSongComponents() {
         const uniqueDeviceId = 'default'; //TODO: gets the device id 
         
         if(this.sendComponentUpdate ) {
@@ -300,7 +300,9 @@ class Controller {
     }
 
     _shouldSendUpdate( propertyName ){
-
+        // If the cache does not contains the property, don't send update.
+        if( !this._cache[propertyName] ) return false;
+        // if the cache is different from the previous update, sends the update to the brain.
         if( this._lastUpdate[propertyName] != this._cache[propertyName] ){
             this._lastUpdate[propertyName] = this._cache[propertyName];
             return true;
